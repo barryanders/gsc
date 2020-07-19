@@ -1,0 +1,7 @@
+./word-dl.sh $1 "out"
+./word-dl.sh $1 "all"
+./word-dl.sh $1 "can"
+./word-dl.sh $1 "eat"
+./word-dl.sh $1 "meet"
+./word-dl.sh $1 "um"
+./word-dl.sh $1 "cree"
