@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 # read -p 'Enter YouTube Channel: ' channel
-channel=$1
+url=$1
+channel=$2
 
 echo "Looking for $channel captions…"
 echo; echo ---; echo
@@ -26,8 +27,8 @@ captions_dl=(
   # Match title filters the returned channel video list by title
   # --match-title trump
 
-  # Input channel, playlist, or video
-  https://www.youtube.com/$channel
+  # Input channel, playlist, or video url
+  $url
 )
 
 "${captions_dl[@]}"
