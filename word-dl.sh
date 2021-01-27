@@ -1,17 +1,27 @@
 #!/usr/bin/env bash
 
+#==============================================================================#
+# starting variables
+#==============================================================================#
 # read -p 'Enter YouTube Channel: ' channel
 channel=$1
 # read -p 'Enter words or phrases: ' words
 words=$2
+# path of the video we want to create
+video="./channels/$channel/$words.mp4"
 
+#==============================================================================#
 # make the channel directory
+#==============================================================================#
 mkdir -p ./channels/$channel
 
-file="./channels/$channel/$words.mp4"
-
-if [[ -f $file ]]; then
+#==============================================================================#
+# search for words
+#==============================================================================#
+# video exists, done
+if [[ -f $video ]]; then
   echo Already have: '"'$words.mp4'"'! Skipping...
+# video does not exist, start searching
 else
   echo; echo ------------------------------; echo
   echo "Searching $channel for: $words"
@@ -20,6 +30,7 @@ else
   IFS=,
   set $(node search.js $channel "$words")
 
+  # search was successful, so $2 no longer equals $words, it equals the start time found
   if [ ! $2 = $words ]; then
     videoId=$1
     startTime=$2
@@ -32,24 +43,24 @@ else
     echo "Start Time:" $startTime
     echo; echo ---; echo
 
-    # -------------------------------------------------------------------------------------------------
-
-    # download clips using ffmpeg and youtube-dl
+    #==============================================================================#
+    # download clips using ffmpeg + youtube-dl
+    #==============================================================================#
     word_dl=(
       ffmpeg
 
       # URL
-      # input file url
+      # input video url
       # -f best or -f 22 or -f 137+140
       -i -
 
       # Start Time
-      # Seeks in this input file to position.
+      # Seeks in this input video to position.
       # Note that in most formats it is not possible to seek exactly, so ffmpeg will seek to the closest seek point before position. When transcoding and -accurate_seek is enabled (the default), this extra segment between the seek point and position will be decoded and discarded. When doing stream copy or when -noaccurate_seek is used, it will be preserved.
       -ss "$startTime"
 
       # Duration
-      # Limit the duration of data read from the input file.
+      # Limit the duration of data read from the input video.
       -t "00:00:10"
 
       # Frames Per Second
@@ -67,58 +78,68 @@ else
       # Audio Codec
       -acodec aac
 
-      # Overwrite output files. (-y for yes, -n for no)
+      # Overwrite output videos. (-y for yes, -n for no)
       -n
 
       # Output Dir
-      $file
+      $video
     )
 
-    # download clips using youtube-dl only
+    #==============================================================================#
+    # download clips alternatively using just youtube-dl
+    #==============================================================================#
     word_dl2=(
       youtube-dl --continue --no-check-certificate
 
-      # -ss: Start Time - Seeks in this input file to position.
-      # -t: Duration - Limit the duration of data read from the input file.
+      # -ss: Start Time - Seeks in this input video to position.
+      # -t: Duration - Limit the duration of data read from the input video.
       --postprocessor-args "-ss $startTime -t 00:00:10"
 
       # Output Dir
-      --output $file
+      --output $video
 
       # Video URL
       "https://www.youtube.com/watch?v=$videoId"
     )
 
+    #==============================================================================#
+    # run word_dl
+    #==============================================================================#
     function run() {
-      if [[ -f $file ]]; then
-        echo Already exists! Skipping $file...
+      # video exists, done
+      if [[ -f $video ]]; then
+        echo Already exists! Skipping $video...
+      # video not found
       else
+        # video url not defined, try again
         if [[ $videoUrl == '' ]]; then
           echo Video URL not found. Looking again...
           videoUrl=$(youtube-dl -f best --get-url https://www.youtube.com/watch?v=$videoId)
           echo; echo ---; echo
           run
+        # video url is defined, get the video
         else
           echo Video URL found!; echo
           echo Video URL: $videoUrl; echo
           echo Downloading video...
           wget -O - "$videoUrl" | "${word_dl[@]}"
-          if [[ -f $file ]]; then
-            echo Done! $file;
+          # video exists, done
+          if [[ -f $video ]]; then
+            echo Done! $video;
+          # video does not exist, retry
           else
-            echo Failed! $file;
+            echo Failed! $video;
             sleep 1;
-            echo Retrying... $file;
+            echo Retrying... $video;
             echo; echo ---; echo
             run
           fi
         fi
       fi
     }
+    # start the run function
     run
   else
     echo "Unable to find: $words"; echo
   fi
 fi
-
-# -------------------------------------------------------------------------------------------------
