@@ -57,11 +57,11 @@ else
       # Start Time
       # Seeks in this input video to position.
       # Note that in most formats it is not possible to seek exactly, so ffmpeg will seek to the closest seek point before position. When transcoding and -accurate_seek is enabled (the default), this extra segment between the seek point and position will be decoded and discarded. When doing stream copy or when -noaccurate_seek is used, it will be preserved.
-      -ss "$startTime"
+      -ss "$((startTime - 2))"
 
       # Duration
       # Limit the duration of data read from the input video.
-      -t "00:00:10"
+      -t "00:00:15"
 
       # Frames Per Second
       # Set frame rate (Hz value, fraction or abbreviation).
