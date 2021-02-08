@@ -41,6 +41,7 @@ readFiles( __dirname + '/channels/' + channel + '/vtt/', (filename, content) => 
     for (let i = 0; i < captions.length; i++) {
       wordSets.push(captions[i]);
     }
+    wordSets.sort(function(a, b){return 0.5 - Math.random()}); // Sort randomly
     for (let i = 0; i < wordSets.length; i++) {
       let wordSet = wordSets[i];
       if (count > limit) {
