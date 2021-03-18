@@ -29,6 +29,9 @@ captions_dl=(
 
   # Input channel, playlist, or video url
   $url
+
+  # only download files once
+  --download-archive archive.txt
 )
 
 "${captions_dl[@]}"
