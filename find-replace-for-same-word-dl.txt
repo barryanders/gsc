@@ -1,8 +1,0 @@
-Find
-^(.*?),(.*?)$
-
-Replace
-videoId=$1
-startTime=$2
-count=$(($count+1))
-ffmpeg -n -ss $startTime -i $(youtube-dl -f 22 --get-url "https://www.youtube.com/watch?v=$videoId") -t 00:00:05 -r 30 -crf 15.0 -vcodec libx264 -acodec aac "./channels/$channel/$words - $count.mp4"
